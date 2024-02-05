@@ -2,7 +2,6 @@ from fastapi import APIRouter ,Response ,status ,HTTPException ,Depends ,Respons
 from sqlalchemy.orm import Session 
 from typing import Optional
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
-import base64
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
@@ -13,7 +12,8 @@ from app.schema import auth_schema ,user_schema
 from app.util import hash
 from app.core.model import User ,ImageUser
 from app.core.database import get_db
-from app.core import security 
+from app.core import security
+from app.service import user_service 
 
 
 router = APIRouter(
@@ -24,7 +24,9 @@ router = APIRouter(
 )
 
 
-
+@router.post('/create-user',response_model=auth_schema.UserOut)
+async def create_user(data :user_schema.UserCreate, db: Session = Depends(get_db)):
+    return await user_service.create_user_account(data, db)
 
 @router.post('/create', response_model=auth_schema.UserOut)
 def create(user: user_schema.UserCreate ,db :Session= Depends(get_db)):
